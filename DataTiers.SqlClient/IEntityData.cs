@@ -1,6 +1,7 @@
 ﻿namespace DataTiers.SqlClient {
     public interface IEntityData {
-        EntityState EntityState { get; set; }
+        EntityState EntityState { get; }
         bool SuppressEvents { get; set; }
+        void AcceptChanges();
     }
 }

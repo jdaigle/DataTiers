@@ -10,7 +10,6 @@ namespace DataTiers.SqlClient.Entities {
 
         public Categories() {
             entityData = new CategoriesEntityData();
-            entityData.EntityState = EntityState.New;
         }
 
         public Int32 CategoryId {

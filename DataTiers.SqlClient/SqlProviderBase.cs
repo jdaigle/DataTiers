@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Data;
-using System.Data.SqlClient;
+using System.Linq;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.Data.SqlClient;
 
 namespace DataTiers.SqlClient {
     public abstract class SqlProviderBase<TEntity> {
@@ -13,28 +15,28 @@ namespace DataTiers.SqlClient {
 
         public ITransactionManager TransactionManager { get { return this.transactionManager; } }
 
-        protected virtual IDataReader ExecuteReader(IDbCommand command) {
+        protected virtual IDataReader ExecuteReader(DbCommand command) {
             if (!transactionManager.IsOpen || transactionManager.TransactionObject == null)
                 throw new InvalidOperationException("Transaction must be open before executing a query.");
             PrepareCommand(command, transactionManager.TransactionObject);
             return command.ExecuteReader(CommandBehavior.Default);
         }
 
-        protected virtual int ExecuteNonQuery(IDbCommand command) {
+        protected virtual int ExecuteNonQuery(DbCommand command) {
             if (!transactionManager.IsOpen || transactionManager.TransactionObject == null)
                 throw new InvalidOperationException("Transaction must be open before executing a query.");
             PrepareCommand(command, transactionManager.TransactionObject);
             return command.ExecuteNonQuery();
         }
 
-        protected virtual object ExecuteScalar(IDbCommand command) {
+        protected virtual object ExecuteScalar(DbCommand command) {
             if (!transactionManager.IsOpen || transactionManager.TransactionObject == null)
                 throw new InvalidOperationException("Transaction must be open before executing a query.");
             PrepareCommand(command, transactionManager.TransactionObject);
             return command.ExecuteScalar();
         }
 
-        protected virtual IDbCommand GetCommand(string storedProcedureName) {
+        protected virtual DbCommand GetCommand(string storedProcedureName) {
             var command = new SqlCommand();
             command.CommandType = CommandType.StoredProcedure;
             command.CommandText = storedProcedureName;
@@ -66,7 +68,24 @@ namespace DataTiers.SqlClient {
             command.Connection = connection;
         }
 
-        protected virtual List<TEntity> ExecuteReader(IDbCommand command, int skip, int maxResults, out int count) {
+        protected virtual DbParameter[] ExecuteNonQuery(DbCommand command, out int count) {
+            var openedTransactionWithinScope = OpenTransactionIfNecessary();
+            try {
+                count = ExecuteNonQuery(command);
+                if (openedTransactionWithinScope)
+                    TransactionManager.Commit();
+                return command.Parameters.Cast<DbParameter>().Where(x => x.Direction == ParameterDirection.Output).ToArray();
+            } catch (Exception) {
+                if (openedTransactionWithinScope)
+                    TransactionManager.Rollback();
+                throw;
+            } finally {
+                if (command != null)
+                    command.Dispose();
+            }
+        }
+
+        protected virtual List<TEntity> ExecuteReader(DbCommand command, int skip, int maxResults, out int count) {
             IDataReader reader = null;
             List<TEntity> rows = new List<TEntity>();
             var openedTransactionWithinScope = OpenTransactionIfNecessary();
@@ -79,10 +98,13 @@ namespace DataTiers.SqlClient {
                         count = reader.GetInt32(0);
                     }
                 }
+                reader.Close();
+                if (openedTransactionWithinScope)
+                    TransactionManager.Commit();
             } catch (Exception) {
                 if (reader != null) {
                     reader.Close();
-                    reader = null;
+                    reader.Dispose();
                 }
                 if (openedTransactionWithinScope)
                     TransactionManager.Rollback();
