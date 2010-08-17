@@ -91,7 +91,7 @@ namespace DataTiers.SqlClient {
         }
 
         public void Rollback() {
-            if (IsOpen) {
+            if (!IsOpen) {
                 throw new InvalidOperationException("Transaction needs to begin first.");
             }
 
