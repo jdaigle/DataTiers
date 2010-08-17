@@ -13,35 +13,35 @@ namespace DataTiers.SqlClient {
 
         public ITransactionManager TransactionManager { get { return this.transactionManager; } }
 
-        protected IDataReader ExecuteReader(IDbCommand command) {
+        protected virtual IDataReader ExecuteReader(IDbCommand command) {
             if (!transactionManager.IsOpen || transactionManager.TransactionObject == null)
                 throw new InvalidOperationException("Transaction must be open before executing a query.");
             PrepareCommand(command, transactionManager.TransactionObject);
             return command.ExecuteReader(CommandBehavior.Default);
         }
 
-        protected int ExecuteNonQuery(IDbCommand command) {
+        protected virtual int ExecuteNonQuery(IDbCommand command) {
             if (!transactionManager.IsOpen || transactionManager.TransactionObject == null)
                 throw new InvalidOperationException("Transaction must be open before executing a query.");
             PrepareCommand(command, transactionManager.TransactionObject);
             return command.ExecuteNonQuery();
         }
 
-        protected object ExecuteScalar(IDbCommand command) {
+        protected virtual object ExecuteScalar(IDbCommand command) {
             if (!transactionManager.IsOpen || transactionManager.TransactionObject == null)
                 throw new InvalidOperationException("Transaction must be open before executing a query.");
             PrepareCommand(command, transactionManager.TransactionObject);
             return command.ExecuteScalar();
         }
 
-        protected IDbCommand GetCommand(string storedProcedureName) {
+        protected virtual IDbCommand GetCommand(string storedProcedureName) {
             var command = new SqlCommand();
             command.CommandType = CommandType.StoredProcedure;
             command.CommandText = storedProcedureName;
             return command;
         }
 
-        protected bool OpenTransactionIfNecessary() {
+        protected virtual bool OpenTransactionIfNecessary() {
             if (!transactionManager.IsOpen) {
                 transactionManager.BeginTransaction();
                 return true;
@@ -66,9 +66,7 @@ namespace DataTiers.SqlClient {
             command.Connection = connection;
         }
 
-        protected abstract List<TEntity> Fill(IDataReader reader, List<TEntity> rows, int skip, int maxResults);
-
-        protected List<TEntity> ExecuteReader(IDbCommand command, int skip, int maxResults, out int count) {
+        protected virtual List<TEntity> ExecuteReader(IDbCommand command, int skip, int maxResults, out int count) {
             IDataReader reader = null;
             List<TEntity> rows = new List<TEntity>();
             var openedTransactionWithinScope = OpenTransactionIfNecessary();
@@ -95,5 +93,24 @@ namespace DataTiers.SqlClient {
             }
             return rows;
         }
+
+        protected virtual List<TEntity> Fill(IDataReader reader, List<TEntity> rows, int skip, int maxResults) {
+            for (int i = 0; i < skip; i++) {
+                if (!reader.Read())
+                    return rows; // not enough rows, just return
+            }
+
+            for (int i = 0; i < maxResults; i++) {
+                if (!reader.Read())
+                    break; // we are done
+
+                var row = FillRow(reader);
+                rows.Add(row);
+            }
+
+            return rows;
+        }
+
+        protected abstract TEntity FillRow(IDataReader reader);
     }
 }
