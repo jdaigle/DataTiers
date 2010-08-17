@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Collections.Generic;
 
 namespace DataTiers.SqlClient {
-    public abstract class SqlProviderBase {
+    public abstract class SqlProviderBase<TEntity> {
         private readonly ITransactionManager transactionManager;
 
         protected SqlProviderBase(ITransactionManager transactionManager) {
@@ -63,6 +64,36 @@ namespace DataTiers.SqlClient {
             if (connection == null)
                 throw new ArgumentNullException("connection");
             command.Connection = connection;
+        }
+
+        protected abstract List<TEntity> Fill(IDataReader reader, List<TEntity> rows, int skip, int maxResults);
+
+        protected List<TEntity> ExecuteReader(IDbCommand command, int skip, int maxResults, out int count) {
+            IDataReader reader = null;
+            List<TEntity> rows = new List<TEntity>();
+            var openedTransactionWithinScope = OpenTransactionIfNecessary();
+            try {
+                reader = ExecuteReader(command);
+                count = -1;
+                Fill(reader, rows, skip, maxResults);
+                if (reader.NextResult()) {
+                    if (reader.Read()) {
+                        count = reader.GetInt32(0);
+                    }
+                }
+            } catch (Exception) {
+                if (reader != null) {
+                    reader.Close();
+                    reader = null;
+                }
+                if (openedTransactionWithinScope)
+                    TransactionManager.Rollback();
+                throw;
+            } finally {
+                if (command != null)
+                    command.Dispose();
+            }
+            return rows;
         }
     }
 }

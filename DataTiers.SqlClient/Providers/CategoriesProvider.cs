@@ -6,40 +6,16 @@ using DataTiers.SqlClient.Entities;
 using System.Data;
 
 namespace DataTiers.SqlClient.Providers {
-    public class CategoriesProvider : SqlProviderBase {
+    public class CategoriesProvider : SqlProviderBase<Categories> {
 
         public CategoriesProvider(ITransactionManager transactionManager) : base(transactionManager) { }
 
         public IList<Categories> GetAll(out int count) {
             var command = GetCommand("_Categories_Get_List");
-            IDataReader reader = null;
-            List<Categories> rows = new List<Categories>();
-            var openedTransactionWithinScope = OpenTransactionIfNecessary();
-            try {
-                reader = ExecuteReader(command);
-                count = -1;
-                Fill(reader, rows, 0, int.MaxValue);
-                if (reader.NextResult()) {
-                    if (reader.Read()) {
-                        count = reader.GetInt32(0);
-                    }
-                }
-            } catch (Exception) {
-                if (reader != null) {
-                    reader.Close();
-                    reader = null;
-                }
-                if (openedTransactionWithinScope)
-                    TransactionManager.Rollback();
-                throw;
-            } finally {
-                if (command != null)
-                    command.Dispose();
-            }
-            return rows;
+            return ExecuteReader(command, 0, int.MaxValue, out count);
         }
 
-        private List<Categories> Fill(IDataReader reader, List<Categories> rows, int skip, int maxResults) {
+        protected override List<Categories> Fill(IDataReader reader, List<Categories> rows, int skip, int maxResults) {
             for (int i = 0; i < skip; i++) {
                 if (!reader.Read())
                     return rows; // not enough rows, just return
@@ -49,14 +25,15 @@ namespace DataTiers.SqlClient.Providers {
                 if (!reader.Read())
                     break; // we are done
 
-                var entityData = new CategoriesEntityData();
-
+                var row = new Categories();
+                var entityData = (row as IEntity).EntityData as CategoriesEntityData;
+                entityData.SuppressEvents = true;
                 entityData.CategoryId = (Int32)reader[CategoriesColumnsHelper.GetColumnName(CategoriesColumn.CategoryId)];
                 entityData.CategoryName = (string)reader[CategoriesColumnsHelper.GetColumnName(CategoriesColumn.CategoryName)];
                 entityData.Description = (string)reader[CategoriesColumnsHelper.GetColumnName(CategoriesColumn.Description)];
                 entityData.Picture = (Byte[])reader[CategoriesColumnsHelper.GetColumnName(CategoriesColumn.Picture)];
-
-                var row = new Categories(entityData);
+                entityData.SuppressEvents = false;
+                entityData.EntityState = EntityState.Unchanged;
 
                 rows.Add(row);
             }

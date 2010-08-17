@@ -4,16 +4,13 @@ using System.Linq;
 using System.Text;
 
 namespace DataTiers.SqlClient.Entities {
-    public class Categories {
+    public class Categories : IEntity {
 
         private CategoriesEntityData entityData;
 
         public Categories() {
             entityData = new CategoriesEntityData();
-        }
-
-        public Categories(CategoriesEntityData entityData) {
-            this.entityData = entityData;
+            entityData.EntityState = EntityState.New;
         }
 
         public Int32 CategoryId {
@@ -48,10 +45,14 @@ namespace DataTiers.SqlClient.Entities {
                 entityData.Picture = value;
             }
         }
+
+        IEntityData IEntity.EntityData {
+            get { return entityData; }
+        }
     }
 
 
-    public class CategoriesEntityData {
+    public class CategoriesEntityData : EntityDataBase {
         public Int32 _CategoryId;
         public String _CategoryName = string.Empty;
         public String _Description = null;
@@ -62,7 +63,10 @@ namespace DataTiers.SqlClient.Entities {
                 return _CategoryId;
             }
             set {
+                if (_CategoryId == value)
+                    return;
                 _CategoryId = value;
+                OnDataChanged();
             }
         }
 
@@ -71,7 +75,10 @@ namespace DataTiers.SqlClient.Entities {
                 return _CategoryName;
             }
             set {
+                if (_CategoryName == value)
+                    return;
                 _CategoryName = value;
+                OnDataChanged();
             }
         }
 
@@ -80,7 +87,10 @@ namespace DataTiers.SqlClient.Entities {
                 return _Description;
             }
             set {
+                if (_Description == value)
+                    return;
                 _Description = value;
+                OnDataChanged();
             }
         }
 
@@ -89,7 +99,10 @@ namespace DataTiers.SqlClient.Entities {
                 return _Picture;
             }
             set {
+                if (_Picture == value)
+                    return;
                 _Picture = value;
+                OnDataChanged();
             }
         }
     }
