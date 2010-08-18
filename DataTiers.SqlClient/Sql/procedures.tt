@@ -18,9 +18,8 @@
 	for (int ti = 0; ti < tables.Length; ti++) {
 		TableInfo tableInfo = tables[ti];
 		ColumnInfo[] columns = tableInfo.Columns.ToArray();
-		string name = tableInfo.ReadableName();
 		
-		string selectAllProcedureName = "sp_cw_" + name + "_Get" + "_All";
+		string selectAllProcedureName = "sp_cw_" + tableInfo.Name + "_Get" + "_All";
 #>
 
 -- Procedures for table: <#= tableInfo.Name #>
@@ -44,7 +43,7 @@ GO
 		ColumnInfo[] fks = tableInfo.ForeignKeys.ToArray();
 		for (int fki = 0; fki < fks.Length; fki++) {
 			ColumnInfo fk = fks[fki];
-			string selectProcedureName = "sp_cw_" + name + "_Get" + "_By" + fk.ReadableName();
+			string selectProcedureName = "sp_cw_" + tableInfo.Name + "_Get" + "_By" + fk.ReadableName();
 			
 	#>
 
@@ -85,7 +84,7 @@ GO
             foreach (var item in indexedColumns) {
                 mergedColumnNames += item.ReadableName();
             }			
-			string selectProcedureName = "sp_cw_" + name + "_Get" + "_By" + mergedColumnNames;
+			string selectProcedureName = "sp_cw_" + tableInfo.Name + "_Get" + "_By" + mergedColumnNames;
 			
 	#>
 

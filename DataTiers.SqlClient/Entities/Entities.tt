@@ -1,0 +1,106 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="C:\src\DataTiers\lib\SqlSchemaExplorer.dll" #>
+<#@ import namespace="SqlSchemaExplorer" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ output extension=".cs" #>
+
+<#@ Include File="../template.settings.t4" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace DataTiers.SqlClient.Entities {
+
+<#
+	string connectionString = @"Server=.\SQLEXPRESS;Database=Northwind;Trusted_Connection=True;";
+	DatabaseInfo databaseInfo = DatabaseInfo.Load(new SqlConnection(connectionString));
+	
+	TableInfo[] tables = databaseInfo.Tables.ToArray();
+	
+	for (int ti = 0; ti < tables.Length; ti++) {
+		TableInfo tableInfo = tables[ti];
+		string name = tableInfo.ReadableName();
+#>
+
+	public class <#= name #> : IEntity {
+
+        private <#= name #>EntityData entityData;
+
+        public <#= name #>() {
+            entityData = new <#= name #>EntityData();
+        }
+			
+		IEntityData IEntity.EntityData {
+            get { return entityData; }
+        }
+		
+		<# for (int i = 0; i < tableInfo.Columns.ToArray().Length; i++) {
+			ColumnInfo column = tableInfo.Columns.ToArray()[i];
+		#>
+
+        public object <#= column.ReadableName() #> {
+            get {
+                return entityData.<#= column.ReadableName() #>;
+            }
+			<# if (!column.IsReadOnly) { #>
+            set {
+                entityData.<#= column.ReadableName() #> = value;
+            }
+			<# } #>
+			
+        }
+		<# } #>
+		
+	}
+	
+	public class <#= name #>EntityData : EntityDataBase {
+		<# for (int i = 0; i < tableInfo.Columns.ToArray().Length; i++) {
+			ColumnInfo column = tableInfo.Columns.ToArray()[i];
+		#>
+		
+		private object _<#= column.ReadableName() #> = null;
+
+        public object <#= column.ReadableName() #> {
+            get {
+                return _<#= column.ReadableName() #>;
+            }
+            set {
+                if (_<#= column.ReadableName() #> == value)
+                    return;
+                _<#= column.ReadableName() #> = value;
+                OnDataChanged();
+            }
+        }
+		<# } #>
+		
+	}
+	
+	[Serializable]
+    public enum <#= name #>Column : int {
+		<# for (int i = 0; i < tableInfo.Columns.ToArray().Length; i++) { #>
+		<#= tableInfo.Columns.ToArray()[i].ReadableName() #> = <#= (i+1) #><# if (i < tableInfo.Columns.ToArray().Length - 1) { #>, <# } #>
+		
+		<# } #>
+		
+    }
+
+    public static class <#= name #>ColumnsHelper {
+        public static string GetColumnName(<#= name #>Column column) {
+            switch (column) {
+				<# for (int i = 0; i < tableInfo.Columns.ToArray().Length; i++) { #>
+				
+				case <#= name #>Column.<#= tableInfo.Columns.ToArray()[i].ReadableName() #>:
+					return "<#= tableInfo.Columns.ToArray()[i].Name #>";				
+				<# } #>
+				
+            }
+            throw new InvalidOperationException("Invalid Enumeration Value");
+        }
+    }
+<# } #>
+
+}
