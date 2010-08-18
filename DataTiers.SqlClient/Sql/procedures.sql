@@ -20,6 +20,7 @@ AS
 GO
 
 	
+	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Category_Get_ByCategoryName]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Category_Get_ByCategoryName]
 GO
@@ -84,6 +85,49 @@ AS
 GO
 
 	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_CustomerCustomerDemo_Get_ByCustomerID]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_CustomerCustomerDemo_Get_ByCustomerID]
+GO
+
+CREATE PROCEDURE [sp_cw_CustomerCustomerDemo_Get_ByCustomerID]
+(
+	@CustomerID NChar (5)
+)
+AS
+    SELECT 
+	[CustomerID],	 
+	[CustomerTypeID]		
+    FROM
+	[CustomerCustomerDemo]
+	WHERE
+	CustomerID = @CustomerID
+
+    SELECT @@ROWCOUNT
+GO
+
+	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_CustomerCustomerDemo_Get_ByCustomerTypeID]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_CustomerCustomerDemo_Get_ByCustomerTypeID]
+GO
+
+CREATE PROCEDURE [sp_cw_CustomerCustomerDemo_Get_ByCustomerTypeID]
+(
+	@CustomerTypeID NChar (10)
+)
+AS
+    SELECT 
+	[CustomerID],	 
+	[CustomerTypeID]		
+    FROM
+	[CustomerCustomerDemo]
+	WHERE
+	CustomerTypeID = @CustomerTypeID
+
+    SELECT @@ROWCOUNT
+GO
+
+	
+	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_CustomerCustomerDemo_Get_ByCustomerIDCustomerTypeID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_CustomerCustomerDemo_Get_ByCustomerIDCustomerTypeID]
 GO
@@ -124,6 +168,7 @@ AS
     SELECT @@ROWCOUNT
 GO
 
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_CustomerDemographic_Get_ByCustomerTypeID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_CustomerDemographic_Get_ByCustomerTypeID]
@@ -172,6 +217,7 @@ AS
     SELECT @@ROWCOUNT
 GO
 
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Customer_Get_ByCity]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Customer_Get_ByCity]
@@ -357,6 +403,44 @@ AS
 GO
 
 	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Employee_Get_ByReportsTo]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_Employee_Get_ByReportsTo]
+GO
+
+CREATE PROCEDURE [sp_cw_Employee_Get_ByReportsTo]
+(
+	@ReportsTo Int
+)
+AS
+    SELECT 
+	[EmployeeID],	 
+	[LastName],	 
+	[FirstName],	 
+	[Title],	 
+	[TitleOfCourtesy],	 
+	[BirthDate],	 
+	[HireDate],	 
+	[Address],	 
+	[City],	 
+	[Region],	 
+	[PostalCode],	 
+	[Country],	 
+	[HomePhone],	 
+	[Extension],	 
+	[Photo],	 
+	[Notes],	 
+	[ReportsTo],	 
+	[PhotoPath]		
+    FROM
+	[Employees]
+	WHERE
+	ReportsTo = @ReportsTo
+
+    SELECT @@ROWCOUNT
+GO
+
+	
+	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Employee_Get_ByLastName]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Employee_Get_ByLastName]
 GO
@@ -486,6 +570,49 @@ AS
 GO
 
 	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_EmployeeTerritory_Get_ByEmployeeID]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_EmployeeTerritory_Get_ByEmployeeID]
+GO
+
+CREATE PROCEDURE [sp_cw_EmployeeTerritory_Get_ByEmployeeID]
+(
+	@EmployeeID Int
+)
+AS
+    SELECT 
+	[EmployeeID],	 
+	[TerritoryID]		
+    FROM
+	[EmployeeTerritories]
+	WHERE
+	EmployeeID = @EmployeeID
+
+    SELECT @@ROWCOUNT
+GO
+
+	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_EmployeeTerritory_Get_ByTerritoryID]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_EmployeeTerritory_Get_ByTerritoryID]
+GO
+
+CREATE PROCEDURE [sp_cw_EmployeeTerritory_Get_ByTerritoryID]
+(
+	@TerritoryID NVarChar (20)
+)
+AS
+    SELECT 
+	[EmployeeID],	 
+	[TerritoryID]		
+    FROM
+	[EmployeeTerritories]
+	WHERE
+	TerritoryID = @TerritoryID
+
+    SELECT @@ROWCOUNT
+GO
+
+	
+	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_EmployeeTerritory_Get_ByEmployeeIDTerritoryID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_EmployeeTerritory_Get_ByEmployeeIDTerritoryID]
 GO
@@ -536,8 +663,7 @@ GO
 
 CREATE PROCEDURE [sp_cw_OrderDetail_Get_ByOrderID]
 (
-		@OrderID Int	
-	
+	@OrderID Int
 )
 AS
     SELECT 
@@ -549,19 +675,19 @@ AS
     FROM
 	[Order Details]
 	WHERE
-		OrderID = @OrderID
-	
+	OrderID = @OrderID
+
     SELECT @@ROWCOUNT
-GO
-	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_OrderDetail_Get_ByOrderID]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_OrderDetail_Get_ByOrderID]
 GO
 
-CREATE PROCEDURE [sp_cw_OrderDetail_Get_ByOrderID]
-(
-		@OrderID Int	
 	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_OrderDetail_Get_ByProductID]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_OrderDetail_Get_ByProductID]
+GO
+
+CREATE PROCEDURE [sp_cw_OrderDetail_Get_ByProductID]
+(
+	@ProductID Int
 )
 AS
     SELECT 
@@ -573,10 +699,12 @@ AS
     FROM
 	[Order Details]
 	WHERE
-		OrderID = @OrderID
-	
+	ProductID = @ProductID
+
     SELECT @@ROWCOUNT
 GO
+
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_OrderDetail_Get_ByOrderIDProductID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_OrderDetail_Get_ByOrderIDProductID]
@@ -600,54 +728,6 @@ AS
 	WHERE
 		OrderID = @OrderID
 		AND ProductID = @ProductID
-	
-    SELECT @@ROWCOUNT
-GO
-	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_OrderDetail_Get_ByProductID]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_OrderDetail_Get_ByProductID]
-GO
-
-CREATE PROCEDURE [sp_cw_OrderDetail_Get_ByProductID]
-(
-		@ProductID Int	
-	
-)
-AS
-    SELECT 
-	[OrderID],	 
-	[ProductID],	 
-	[UnitPrice],	 
-	[Quantity],	 
-	[Discount]		
-    FROM
-	[Order Details]
-	WHERE
-		ProductID = @ProductID
-	
-    SELECT @@ROWCOUNT
-GO
-	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_OrderDetail_Get_ByProductID]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_OrderDetail_Get_ByProductID]
-GO
-
-CREATE PROCEDURE [sp_cw_OrderDetail_Get_ByProductID]
-(
-		@ProductID Int	
-	
-)
-AS
-    SELECT 
-	[OrderID],	 
-	[ProductID],	 
-	[UnitPrice],	 
-	[Quantity],	 
-	[Discount]		
-    FROM
-	[Order Details]
-	WHERE
-		ProductID = @ProductID
 	
     SELECT @@ROWCOUNT
 GO
@@ -688,8 +768,7 @@ GO
 
 CREATE PROCEDURE [sp_cw_Order_Get_ByCustomerID]
 (
-		@CustomerID NChar (5)	
-	
+	@CustomerID NChar (5)
 )
 AS
     SELECT 
@@ -710,43 +789,11 @@ AS
     FROM
 	[Orders]
 	WHERE
-		CustomerID = @CustomerID
-	
+	CustomerID = @CustomerID
+
     SELECT @@ROWCOUNT
-GO
-	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Order_Get_ByCustomerID]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_Order_Get_ByCustomerID]
 GO
 
-CREATE PROCEDURE [sp_cw_Order_Get_ByCustomerID]
-(
-		@CustomerID NChar (5)	
-	
-)
-AS
-    SELECT 
-	[OrderID],	 
-	[CustomerID],	 
-	[EmployeeID],	 
-	[OrderDate],	 
-	[RequiredDate],	 
-	[ShippedDate],	 
-	[ShipVia],	 
-	[Freight],	 
-	[ShipName],	 
-	[ShipAddress],	 
-	[ShipCity],	 
-	[ShipRegion],	 
-	[ShipPostalCode],	 
-	[ShipCountry]		
-    FROM
-	[Orders]
-	WHERE
-		CustomerID = @CustomerID
-	
-    SELECT @@ROWCOUNT
-GO
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Order_Get_ByEmployeeID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Order_Get_ByEmployeeID]
@@ -754,8 +801,7 @@ GO
 
 CREATE PROCEDURE [sp_cw_Order_Get_ByEmployeeID]
 (
-		@EmployeeID Int	
-	
+	@EmployeeID Int
 )
 AS
     SELECT 
@@ -776,19 +822,19 @@ AS
     FROM
 	[Orders]
 	WHERE
-		EmployeeID = @EmployeeID
-	
+	EmployeeID = @EmployeeID
+
     SELECT @@ROWCOUNT
-GO
-	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Order_Get_ByEmployeeID]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_Order_Get_ByEmployeeID]
 GO
 
-CREATE PROCEDURE [sp_cw_Order_Get_ByEmployeeID]
-(
-		@EmployeeID Int	
 	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Order_Get_ByShipVium]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_Order_Get_ByShipVium]
+GO
+
+CREATE PROCEDURE [sp_cw_Order_Get_ByShipVium]
+(
+	@ShipVia Int
 )
 AS
     SELECT 
@@ -809,10 +855,12 @@ AS
     FROM
 	[Orders]
 	WHERE
-		EmployeeID = @EmployeeID
-	
+	ShipVia = @ShipVia
+
     SELECT @@ROWCOUNT
 GO
+
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Order_Get_ByOrderDate]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Order_Get_ByOrderDate]
@@ -913,39 +961,6 @@ AS
     SELECT @@ROWCOUNT
 GO
 	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Order_Get_ByShipVium]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_Order_Get_ByShipVium]
-GO
-
-CREATE PROCEDURE [sp_cw_Order_Get_ByShipVium]
-(
-		@ShipVia Int	
-	
-)
-AS
-    SELECT 
-	[OrderID],	 
-	[CustomerID],	 
-	[EmployeeID],	 
-	[OrderDate],	 
-	[RequiredDate],	 
-	[ShippedDate],	 
-	[ShipVia],	 
-	[Freight],	 
-	[ShipName],	 
-	[ShipAddress],	 
-	[ShipCity],	 
-	[ShipRegion],	 
-	[ShipPostalCode],	 
-	[ShipCountry]		
-    FROM
-	[Orders]
-	WHERE
-		ShipVia = @ShipVia
-	
-    SELECT @@ROWCOUNT
-GO
-	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Order_Get_ByShipPostalCode]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Order_Get_ByShipPostalCode]
 GO
@@ -1005,14 +1020,13 @@ AS
 GO
 
 	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Product_Get_ByCategoryID]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_Product_Get_ByCategoryID]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Product_Get_BySupplierID]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_Product_Get_BySupplierID]
 GO
 
-CREATE PROCEDURE [sp_cw_Product_Get_ByCategoryID]
+CREATE PROCEDURE [sp_cw_Product_Get_BySupplierID]
 (
-		@CategoryID Int	
-	
+	@SupplierID Int
 )
 AS
     SELECT 
@@ -1029,10 +1043,11 @@ AS
     FROM
 	[Products]
 	WHERE
-		CategoryID = @CategoryID
-	
+	SupplierID = @SupplierID
+
     SELECT @@ROWCOUNT
 GO
+
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Product_Get_ByCategoryID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Product_Get_ByCategoryID]
@@ -1040,8 +1055,7 @@ GO
 
 CREATE PROCEDURE [sp_cw_Product_Get_ByCategoryID]
 (
-		@CategoryID Int	
-	
+	@CategoryID Int
 )
 AS
     SELECT 
@@ -1058,10 +1072,12 @@ AS
     FROM
 	[Products]
 	WHERE
-		CategoryID = @CategoryID
-	
+	CategoryID = @CategoryID
+
     SELECT @@ROWCOUNT
 GO
+
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Product_Get_ByProductID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Product_Get_ByProductID]
@@ -1121,64 +1137,6 @@ AS
     SELECT @@ROWCOUNT
 GO
 	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Product_Get_BySupplierID]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_Product_Get_BySupplierID]
-GO
-
-CREATE PROCEDURE [sp_cw_Product_Get_BySupplierID]
-(
-		@SupplierID Int	
-	
-)
-AS
-    SELECT 
-	[ProductID],	 
-	[ProductName],	 
-	[SupplierID],	 
-	[CategoryID],	 
-	[QuantityPerUnit],	 
-	[UnitPrice],	 
-	[UnitsInStock],	 
-	[UnitsOnOrder],	 
-	[ReorderLevel],	 
-	[Discontinued]		
-    FROM
-	[Products]
-	WHERE
-		SupplierID = @SupplierID
-	
-    SELECT @@ROWCOUNT
-GO
-	
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Product_Get_BySupplierID]') AND type in (N'P', N'PC'))
-	DROP PROCEDURE [sp_cw_Product_Get_BySupplierID]
-GO
-
-CREATE PROCEDURE [sp_cw_Product_Get_BySupplierID]
-(
-		@SupplierID Int	
-	
-)
-AS
-    SELECT 
-	[ProductID],	 
-	[ProductName],	 
-	[SupplierID],	 
-	[CategoryID],	 
-	[QuantityPerUnit],	 
-	[UnitPrice],	 
-	[UnitsInStock],	 
-	[UnitsOnOrder],	 
-	[ReorderLevel],	 
-	[Discontinued]		
-    FROM
-	[Products]
-	WHERE
-		SupplierID = @SupplierID
-	
-    SELECT @@ROWCOUNT
-GO
-	
 
 -- Procedures for table: Region
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Region_Get_All]') AND type in (N'P', N'PC'))
@@ -1196,6 +1154,7 @@ AS
     SELECT @@ROWCOUNT
 GO
 
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Region_Get_ByRegionID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Region_Get_ByRegionID]
@@ -1236,6 +1195,7 @@ AS
     SELECT @@ROWCOUNT
 GO
 
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Shipper_Get_ByShipperID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Shipper_Get_ByShipperID]
@@ -1286,6 +1246,7 @@ AS
     SELECT @@ROWCOUNT
 GO
 
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Supplier_Get_ByCompanyName]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Supplier_Get_ByCompanyName]
@@ -1398,6 +1359,29 @@ AS
     SELECT @@ROWCOUNT
 GO
 
+	
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Territory_Get_ByRegionID]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [sp_cw_Territory_Get_ByRegionID]
+GO
+
+CREATE PROCEDURE [sp_cw_Territory_Get_ByRegionID]
+(
+	@RegionID Int
+)
+AS
+    SELECT 
+	[TerritoryID],	 
+	[TerritoryDescription],	 
+	[RegionID]		
+    FROM
+	[Territories]
+	WHERE
+	RegionID = @RegionID
+
+    SELECT @@ROWCOUNT
+GO
+
+	
 	
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[sp_cw_Territory_Get_ByTerritoryID]') AND type in (N'P', N'PC'))
 	DROP PROCEDURE [sp_cw_Territory_Get_ByTerritoryID]
