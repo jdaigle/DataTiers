@@ -6,13 +6,13 @@ using System.Linq;
 using DataTiers.SqlClient.Entities;
 
 namespace DataTiers.SqlClient.Providers {
-    public class CategoriesProvider : SqlProviderBase<Categories> {
+    public class CategoriesProvider : SqlProviderBase<Category> {
 
         public CategoriesProvider(ITransactionManager transactionManager) : base(transactionManager) { }
 
-        public Categories GetByCategoryId(int categoryid) {
-            var command = GetCommand("_Categories_GetByCategoryId");
-            command.Parameters.Add(new SqlParameter("@CategoryId", categoryid));
+        public Category GetByCategoryId(int categoryid) {
+            var command = GetCommand("sp_cw_Categories_Get_ByCategoryID");
+            command.Parameters.Add(new SqlParameter("@CategoryID", categoryid));
             var count = 1;
             var results = ExecuteReader(command, 0, int.MaxValue, out count);
             if (results.Count == 1)
@@ -23,14 +23,14 @@ namespace DataTiers.SqlClient.Providers {
                 throw new DataException("Cannot find the unique instance of the class.");
         }
 
-        public IList<Categories> GetAll(out int count) {
-            var command = GetCommand("_Categories_Get_List");
+        public IList<Category> GetAll(out int count) {
+            var command = GetCommand("sp_cw_Categories_Get_All");
             return ExecuteReader(command, 0, int.MaxValue, out count);
         }
 
-        public bool Update(Categories entity) {
+        public bool Update(Category entity) {
             var command = GetCommand("_Categories_Update");
-            command.Parameters.Add(new SqlParameter("@CategoryId", entity.CategoryId));
+            command.Parameters.Add(new SqlParameter("@CategoryId", entity.CategoryID));
             command.Parameters.Add(new SqlParameter("@CategoryName", entity.CategoryName));
             command.Parameters.Add(new SqlParameter("@Description", entity.Description));
             command.Parameters.Add(new SqlParameter("@Picture", entity.Picture));
@@ -44,7 +44,7 @@ namespace DataTiers.SqlClient.Providers {
             return count == 1;
         }
 
-        public bool Insert(Categories entity) {
+        public bool Insert(Category entity) {
             var command = GetCommand("_Categories_Insert");
             command.Parameters.Add(new SqlParameter("@CategoryId", SqlDbType.Int) { Direction = ParameterDirection.Output });
             command.Parameters.Add(new SqlParameter("@CategoryName", entity.CategoryName));
@@ -55,9 +55,9 @@ namespace DataTiers.SqlClient.Providers {
             var outParams = ExecuteNonQuery(command, out count);
 
             if (count == 1) {
-                var entityData = (entity as IEntity).EntityData as CategoriesEntityData;
+                var entityData = (entity as IEntity).EntityData as CategoryEntityData;
                 entityData.SuppressEvents = true;
-                entityData.CategoryId = (Int32)outParams.Single(x => x.ParameterName == "@CategoryId").Value;
+                entityData.CategoryID = (Int32)outParams.Single(x => x.ParameterName == "@CategoryId").Value;
                 entityData.SuppressEvents = false;
                 entityData.AcceptChanges();
             }
@@ -65,14 +65,14 @@ namespace DataTiers.SqlClient.Providers {
             return count == 1;
         }
 
-        protected override Categories FillRow(IDataReader reader) {
-            var row = new Categories();
-            var entityData = (row as IEntity).EntityData as CategoriesEntityData;
+        protected override Category FillRow(IDataReader reader) {
+            var row = new Category();
+            var entityData = (row as IEntity).EntityData as CategoryEntityData;
             entityData.SuppressEvents = true;
-            entityData.CategoryId = (Int32)reader[CategoriesColumnsHelper.GetColumnName(CategoriesColumn.CategoryId)];
-            entityData.CategoryName = (string)reader[CategoriesColumnsHelper.GetColumnName(CategoriesColumn.CategoryName)];
-            entityData.Description = (string)reader[CategoriesColumnsHelper.GetColumnName(CategoriesColumn.Description)];
-            entityData.Picture = (Byte[])reader[CategoriesColumnsHelper.GetColumnName(CategoriesColumn.Picture)];
+            entityData.CategoryID = (Int32)reader[CategoryColumnsHelper.GetColumnName(CategoryColumn.CategoryID)];
+            entityData.CategoryName = (string)reader[CategoryColumnsHelper.GetColumnName(CategoryColumn.CategoryName)];
+            entityData.Description = (string)reader[CategoryColumnsHelper.GetColumnName(CategoryColumn.Description)];
+            entityData.Picture = (Byte[])reader[CategoryColumnsHelper.GetColumnName(CategoryColumn.Picture)];
             entityData.SuppressEvents = false;
             entityData.AcceptChanges();
             return row;
