@@ -1,0 +1,89 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="C:\src\DataTiers\lib\SqlSchemaExplorer.dll" #>
+<#@ import namespace="SqlSchemaExplorer" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ output extension=".sql" #>
+
+<#@ Include File="../template.settings.t4" #>
+
+<#
+	string connectionString = @"Server=.\SQLEXPRESS;Database=Northwind;Trusted_Connection=True;";
+	DatabaseInfo databaseInfo = DatabaseInfo.Load(new SqlConnection(connectionString));
+	
+	TableInfo[] tables = databaseInfo.Tables.ToArray();
+	
+	for (int ti = 0; ti < tables.Length; ti++) {
+		TableInfo tableInfo = tables[ti];
+		ColumnInfo[] columns = tableInfo.Columns.ToArray();
+		string name = tableInfo.ReadableName();
+		
+		string selectAllProcedureName = "sp_cw_" + name + "_Get" + "_All";
+#>
+
+-- Procedures for table: <#= tableInfo.Name #>
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[<#= selectAllProcedureName #>]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [<#= selectAllProcedureName #>]
+GO
+
+CREATE PROCEDURE [<#= selectAllProcedureName #>]
+AS
+    SELECT<# for (int ci = 0; ci < columns.Length; ci++) { #> 
+	[<#= columns[ci].Name #>]<# if (ci < columns.Length - 1) { #>,<# } #>
+	<# } #>
+    FROM
+	
+	[<#= tableInfo.Name #>]
+
+    SELECT @@ROWCOUNT
+GO
+
+	<#
+		IndexInfo[] indexes = tableInfo.Indexes.ToArray();
+		for (int ii = 0; ii < indexes.Length; ii++) {
+			IndexInfo index = indexes[ii];
+			string indexName = index.ReadableName();
+			ColumnInfo[] indexedColumns = index.IndexedColumns.ToArray();
+			string mergedColumnNames = string.Empty;
+            foreach (var item in indexedColumns) {
+                mergedColumnNames += item.ReadableName();
+            }			
+			string selectProcedureName = "sp_cw_" + name + "_Get" + "_By" + mergedColumnNames;
+			
+	#>
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[<#= selectProcedureName #>]') AND type in (N'P', N'PC'))
+	DROP PROCEDURE [<#= selectProcedureName #>]
+GO
+
+CREATE PROCEDURE [<#= selectProcedureName #>]
+(
+	<# for (int ci = 0; ci < indexedColumns.Length; ci++) { #>
+	@<#= indexedColumns[ci].Name #> <#= indexedColumns[ci].GetNativeType() #><# if (ci < indexedColumns.Length - 1) { #>,<# } #>
+	
+	<# } #>
+
+)
+AS
+    SELECT<# for (int ci = 0; ci < columns.Length; ci++) { #> 
+	[<#= columns[ci].Name #>]<# if (ci < columns.Length - 1) { #>,<# } #>
+	<# } #>
+	
+    FROM
+	[<#= tableInfo.Name #>]
+	WHERE
+	<# for (int ci = 0; ci < indexedColumns.Length; ci++) { #>
+	<# if (ci > 0) { #>AND <# } #><#= indexedColumns[ci].Name #> = @<#= indexedColumns[ci].Name #>
+	<# } #>
+
+    SELECT @@ROWCOUNT
+GO
+	<#
+		}
+	#>
+
+<#
+	}
+#>
